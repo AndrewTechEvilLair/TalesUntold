@@ -1,0 +1,1742 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tales Untold</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=VT323&family=Share+Tech+Mono&display=swap');
+
+    :root {
+      --color-primary: #33ff33;
+      --color-dim: #1a7a1a;
+      --color-bg: #0a0a0a;
+      --color-panel: #0f0f0f;
+      --color-border: #1a7a1a;
+      --color-choice-bg: #0c0c0c;
+    }
+
+    body.fantasy { --color-primary: #33ff33; --color-dim: #1a7a1a; --color-border: #1a7a1a; }
+    body.scifi   { --color-primary: #33ddff; --color-dim: #1a7a99; --color-border: #1a7a99; }
+    body.mystery { --color-primary: #ffaa00; --color-dim: #996600; --color-border: #996600; }
+    body.horror  { --color-primary: #ff3333; --color-dim: #991a1a; --color-border: #991a1a; }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    /* ── SCROLLBARS ───────────────────────────────── */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: var(--color-bg); }
+    ::-webkit-scrollbar-thumb { background: var(--color-border); }
+    ::-webkit-scrollbar-thumb:hover { background: var(--color-primary); }
+    * { scrollbar-width: thin; scrollbar-color: var(--color-border) var(--color-bg); }
+
+    html, body { height: 100%; }
+
+    body {
+      background: var(--color-bg);
+      color: var(--color-primary);
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 15px;
+      line-height: 1.6;
+      height: 100vh;
+      overflow: hidden;
+      padding: 20px 20px 0 20px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    #app {
+      max-width: 1100px;
+      width: 100%;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      min-height: 0;
+    }
+
+    /* ── HEADER ───────────────────────────────────── */
+    #header {
+      text-align: center;
+      margin-bottom: 20px;
+      padding-bottom: 14px;
+      border-bottom: 1px solid var(--color-border);
+      flex-shrink: 0;
+    }
+
+    #title {
+      font-family: 'VT323', monospace;
+      font-size: 52px;
+      letter-spacing: 8px;
+      color: var(--color-primary);
+      text-shadow: 0 0 20px var(--color-primary), 0 0 40px rgba(255,255,255,0.05);
+    }
+
+    #subtitle {
+      color: var(--color-dim);
+      font-size: 12px;
+      letter-spacing: 3px;
+      margin-top: 4px;
+    }
+
+    /* ── TWO-COLUMN LAYOUT ────────────────────────── */
+    #main-layout {
+      display: grid;
+      grid-template-columns: 1fr 190px;
+      gap: 24px;
+      flex: 1;
+      min-height: 0;
+    }
+
+    /* ── LEFT COLUMN: STORY ───────────────────────── */
+    #story-col {
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+    }
+
+    /* ── STORY HEADER BAR ─────────────────────────── */
+    .col-label {
+      color: var(--color-dim);
+      font-size: 11px;
+      letter-spacing: 3px;
+      margin-bottom: 6px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      flex-shrink: 0;
+    }
+
+    .col-label-left { flex-shrink: 0; }
+    .col-label-right { flex-shrink: 0; }
+
+    #turn-display {
+      color: var(--color-dim);
+      font-size: 11px;
+      letter-spacing: 1px;
+      opacity: 0;
+      transition: opacity 0.4s;
+    }
+
+    #turn-display.visible { opacity: 1; }
+
+    #cost-ticker {
+      color: var(--color-dim);
+      font-size: 11px;
+      letter-spacing: 1px;
+      opacity: 0;
+      transition: opacity 0.4s;
+    }
+
+    #cost-ticker.visible { opacity: 1; }
+    #cost-ticker .cost-value { color: var(--color-primary); }
+
+    /* ── PROCESS STRIP (inline) ───────────────────── */
+    #process-stages {
+      display: flex;
+      align-items: center;
+      gap: 0;
+      flex: 1;
+      justify-content: center;
+    }
+
+    .process-stage {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 10px;
+      letter-spacing: 1px;
+      color: var(--color-dim);
+      transition: all 0.3s;
+      opacity: 0.35;
+      white-space: nowrap;
+    }
+
+    .process-stage .stage-dot {
+      width: 5px;
+      height: 5px;
+      border: 1px solid var(--color-dim);
+      border-radius: 50%;
+      flex-shrink: 0;
+      transition: all 0.3s;
+    }
+
+    .process-arrow {
+      color: var(--color-dim);
+      opacity: 0.3;
+      font-size: 10px;
+      padding: 0 3px;
+    }
+
+    .process-stage.active {
+      color: var(--color-primary);
+      opacity: 1;
+      font-size: 12px;
+      text-shadow: 0 0 8px var(--color-primary);
+    }
+    .process-stage.active .stage-dot {
+      width: 7px;
+      height: 7px;
+      background: var(--color-primary);
+      border-color: var(--color-primary);
+      box-shadow: 0 0 6px var(--color-primary), 0 0 12px var(--color-primary);
+    }
+    .process-stage.done { opacity: 0.25; }
+    .process-stage.done .stage-dot { background: var(--color-dim); border-color: var(--color-dim); }
+
+    #process-description {
+      font-size: 11px;
+      color: var(--color-dim);
+      line-height: 1.5;
+      min-height: 18px;
+      margin-bottom: 8px;
+      flex-shrink: 0;
+    }
+
+    #process-description span { color: var(--color-primary); }
+
+    /* ── STORY BOX ────────────────────────────────── */
+    #story-box {
+      background: var(--color-panel);
+      border: 1px solid var(--color-border);
+      padding: 24px;
+      margin-bottom: 12px;
+      line-height: 1.9;
+      font-size: 16px;
+      cursor: default;
+      position: relative;
+      flex: 1;
+      min-height: 0;
+      overflow-y: auto;
+    }
+
+    #story-box.clickable { cursor: pointer; }
+
+    #skip-hint {
+      position: absolute;
+      bottom: 10px;
+      right: 14px;
+      font-size: 10px;
+      color: var(--color-dim);
+      letter-spacing: 1px;
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+
+    #story-box.clickable #skip-hint { opacity: 1; }
+
+    #story-text { white-space: pre-wrap; }
+
+    #story-text.typing::after {
+      content: '█';
+      animation: blink 0.7s step-end infinite;
+    }
+
+    @keyframes blink { 50% { opacity: 0; } }
+
+    @keyframes pulse-border {
+      0%   { box-shadow: 0 0 0 0 rgba(51,255,51,0.55); }
+      60%  { box-shadow: 0 0 0 7px rgba(51,255,51,0); }
+      100% { box-shadow: 0 0 0 0 rgba(51,255,51,0); }
+    }
+
+    #robot-toggle-wrap.pulsing #robot-btn {
+      animation: pulse-border 1.1s ease-out 3;
+    }
+
+    /* ── CHOICES ──────────────────────────────────── */
+    #choices-box {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+
+    .choice-btn {
+      background: var(--color-choice-bg);
+      border: 1px solid var(--color-dim);
+      border-left: 3px solid var(--color-dim);
+      color: var(--color-dim);
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 14px;
+      padding: 12px 18px;
+      text-align: left;
+      cursor: pointer;
+      transition: all 0.15s;
+      letter-spacing: 0.3px;
+      line-height: 1.5;
+      width: 100%;
+    }
+
+    .choice-btn:hover {
+      border-color: var(--color-primary);
+      border-left-color: var(--color-primary);
+      border-left-width: 5px;
+      color: var(--color-primary);
+      background: rgba(255,255,255,0.03);
+      padding-left: 26px;
+    }
+
+    .choice-btn:disabled { opacity: 0.25; cursor: not-allowed; }
+    .choice-btn:disabled:hover {
+      border-left-width: 3px;
+      padding-left: 18px;
+      background: var(--color-choice-bg);
+      border-color: var(--color-dim);
+      color: var(--color-dim);
+    }
+
+    .choice-num { color: var(--color-dim); margin-right: 10px; font-size: 13px; }
+    .choice-btn:hover .choice-num { color: var(--color-primary); }
+
+    #no-wrong-hint {
+      font-size: 10px;
+      color: var(--color-dim);
+      letter-spacing: 1px;
+      text-align: center;
+      padding: 6px 0 2px;
+      opacity: 0;
+      transition: opacity 0.5s;
+      flex-shrink: 0;
+    }
+
+    #no-wrong-hint.visible { opacity: 1; }
+
+    /* ── START BUTTON ─────────────────────────────── */
+    #start-btn {
+      background: none;
+      border: 1px solid var(--color-primary);
+      color: var(--color-primary);
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 14px;
+      letter-spacing: 4px;
+      padding: 13px 40px;
+      cursor: pointer;
+      transition: all 0.15s;
+      display: block;
+      width: 100%;
+    }
+
+    #start-btn:hover {
+      background: rgba(255,255,255,0.04);
+      box-shadow: 0 0 16px rgba(255,255,255,0.06), inset 0 0 16px rgba(255,255,255,0.02);
+    }
+
+    /* ── RIGHT COLUMN: SIDEBAR ────────────────────── */
+    #sidebar {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      min-height: 0;
+    }
+
+    .sidebar-section {
+      border: 1px solid var(--color-border);
+      border-bottom: none;
+      padding: 14px;
+    }
+
+    .sidebar-section:last-child { border-bottom: 1px solid var(--color-border); }
+
+    .sidebar-label {
+      color: var(--color-dim);
+      font-size: 10px;
+      letter-spacing: 3px;
+      margin-bottom: 10px;
+    }
+
+    /* ── GENRE SELECTOR ───────────────────────────── */
+    #genre-collapsed {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+      padding: 2px 0;
+    }
+
+    #genre-collapsed-label {
+      color: var(--color-primary);
+      font-size: 13px;
+      letter-spacing: 2px;
+    }
+
+    #genre-change-hint {
+      color: var(--color-dim);
+      font-size: 10px;
+      letter-spacing: 1px;
+    }
+
+    #genre-buttons {
+      display: none;
+      flex-direction: column;
+      gap: 5px;
+      margin-top: 10px;
+    }
+
+    #genre-buttons.open { display: flex; }
+
+    .genre-btn {
+      background: none;
+      border: 1px solid transparent;
+      border-left: 2px solid var(--color-dim);
+      color: var(--color-dim);
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 12px;
+      letter-spacing: 2px;
+      padding: 6px 10px;
+      cursor: pointer;
+      transition: all 0.12s;
+      text-align: left;
+      width: 100%;
+    }
+
+    .genre-btn:hover { color: var(--color-primary); border-left-color: var(--color-primary); background: rgba(255,255,255,0.02); }
+    .genre-btn.active { color: var(--color-primary); border-left-color: var(--color-primary); border-left-width: 4px; padding-left: 8px; background: rgba(255,255,255,0.03); }
+    .genre-btn.locked { opacity: 0.4; cursor: not-allowed; }
+    .genre-btn.locked:hover { color: var(--color-dim); border-left-color: var(--color-dim); border-left-width: 2px; padding-left: 10px; background: none; }
+
+    .genre-btn .recommended {
+      float: right;
+      font-size: 9px;
+      letter-spacing: 1px;
+      color: var(--color-dim);
+      border: 1px solid var(--color-dim);
+      padding: 1px 4px;
+      margin-top: 1px;
+    }
+
+    .genre-btn.active .recommended,
+    .genre-btn:hover .recommended { color: var(--color-primary); border-color: var(--color-primary); }
+
+    #genre-lock-msg {
+      font-size: 10px;
+      color: var(--color-dim);
+      letter-spacing: 1px;
+      margin-top: 8px;
+      min-height: 14px;
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+
+    #genre-lock-msg.visible { opacity: 1; }
+
+    /* ── ROBOT BUTTON ─────────────────────────────── */
+    #robot-btn {
+      background: none;
+      border: 1px solid var(--color-dim);
+      border-left: 3px solid var(--color-primary);
+      color: var(--color-primary);
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 1px;
+      padding: 12px 14px;
+      cursor: pointer;
+      transition: all 0.15s;
+      text-align: left;
+      width: 100%;
+      line-height: 1.5;
+    }
+
+    #robot-btn .robot-btn-label {
+      font-size: 10px;
+      color: var(--color-dim);
+      letter-spacing: 2px;
+      display: block;
+      margin-bottom: 3px;
+    }
+
+    #robot-btn .robot-btn-title {
+      color: var(--color-primary);
+      font-size: 12px;
+      letter-spacing: 1px;
+    }
+
+    #robot-btn .robot-btn-arrow {
+      float: right;
+      font-size: 12px;
+      line-height: 1;
+      margin-top: 2px;
+      color: var(--color-dim);
+    }
+
+    #robot-btn:hover {
+      border-color: var(--color-primary);
+      border-left-width: 4px;
+      background: rgba(255,255,255,0.02);
+    }
+
+    #robot-hint {
+      display: none;
+      font-size: 10px;
+      color: var(--color-primary);
+      letter-spacing: 1px;
+      margin-top: 8px;
+      padding: 6px 8px;
+      border: 1px solid var(--color-primary);
+      background: rgba(51,255,51,0.04);
+      text-align: center;
+      transition: opacity 0.3s;
+    }
+
+    #robot-hint.visible { display: block; }
+    #robot-hint.blinking { animation: blink 0.8s step-end infinite; }
+
+    #robot-btn {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .robot-sprite {
+      width: 48px;
+      height: 48px;
+      image-rendering: pixelated;
+      flex-shrink: 0;
+    }
+
+    .robot-btn-text {
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      min-width: 0;
+    }
+
+    /* ── ROBOT MODAL ──────────────────────────────── */
+    #robot-modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.75);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+    }
+
+    #robot-modal.open { display: flex; }
+
+    #robot-modal-inner {
+      width: min(860px, 92vw);
+      max-height: 80vh;
+      display: flex;
+      flex-direction: column;
+      background: var(--color-panel);
+      border: 1px solid var(--color-border);
+      border-top: 2px solid var(--color-primary);
+    }
+
+    #robot-modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--color-border);
+      flex-shrink: 0;
+    }
+
+    #robot-modal-header span {
+      color: var(--color-dim);
+      font-size: 10px;
+      letter-spacing: 3px;
+    }
+
+    #robot-modal-close {
+      background: none;
+      border: 1px solid var(--color-border);
+      color: var(--color-dim);
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 1px;
+      padding: 4px 10px;
+      cursor: pointer;
+      transition: all 0.12s;
+    }
+
+    #robot-modal-close:hover {
+      border-color: var(--color-primary);
+      color: var(--color-primary);
+    }
+
+    /* ── MODAL TABS ───────────────────────────────── */
+    #drawer-tabs {
+      display: flex;
+      flex-shrink: 0;
+      border-bottom: 1px solid var(--color-border);
+    }
+
+    .drawer-tab {
+      background: none;
+      border: none;
+      border-right: 1px solid var(--color-border);
+      color: var(--color-dim);
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 1px;
+      padding: 8px 12px;
+      cursor: pointer;
+      transition: all 0.12s;
+      white-space: nowrap;
+      flex: 1;
+      text-align: center;
+    }
+
+    .drawer-tab:last-child { border-right: none; }
+
+    .drawer-tab:hover { color: var(--color-primary); background: rgba(255,255,255,0.02); }
+
+    .drawer-tab.active {
+      color: var(--color-primary);
+      background: rgba(255,255,255,0.03);
+      border-bottom: 2px solid var(--color-primary);
+      margin-bottom: -1px;
+    }
+
+    /* ── MODAL CONTENT ────────────────────────────── */
+    #drawer-content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px 20px;
+      font-size: 12px;
+      line-height: 1.7;
+    }
+
+    .panel-note {
+      color: var(--color-dim);
+      font-size: 11px;
+      margin-bottom: 12px;
+      line-height: 1.6;
+      border-left: 2px solid var(--color-border);
+      padding-left: 10px;
+    }
+
+    .stat-row {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 6px;
+      flex-wrap: wrap;
+    }
+
+    .stat-label { color: var(--color-dim); min-width: 160px; font-size: 11px; }
+    .stat-value { color: var(--color-primary); font-size: 11px; }
+
+    #drawer-content pre {
+      white-space: pre-wrap;
+      word-break: break-all;
+      color: var(--color-dim);
+      margin-top: 8px;
+      font-size: 11px;
+      line-height: 1.6;
+    }
+
+    /* ── API SECTION ─────────────────────────────────── */
+    #api-status-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    #api-status-text {
+      font-size: 10px;
+      letter-spacing: 1px;
+      color: var(--color-dim);
+    }
+
+    #api-status-text.live { color: var(--color-primary); }
+
+    #api-connect-btn {
+      background: none;
+      border: 1px solid var(--color-dim);
+      color: var(--color-dim);
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 9px;
+      letter-spacing: 1px;
+      padding: 3px 8px;
+      cursor: pointer;
+      transition: all 0.12s;
+    }
+
+    #api-connect-btn:hover { border-color: var(--color-primary); color: var(--color-primary); }
+
+    #api-input-wrap {
+      display: none;
+      flex-direction: column;
+      gap: 6px;
+      margin-top: 8px;
+    }
+
+    #api-input-wrap.open { display: flex; }
+
+    #api-key-input {
+      background: var(--color-bg);
+      border: 1px solid var(--color-border);
+      color: var(--color-primary);
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 10px;
+      padding: 6px 8px;
+      width: 100%;
+      letter-spacing: 1px;
+      outline: none;
+    }
+
+    #api-key-input:focus { border-color: var(--color-primary); }
+    #api-key-input::placeholder { color: var(--color-dim); opacity: 0.6; }
+
+    .api-btn-row { display: flex; gap: 6px; }
+
+    .api-btn {
+      flex: 1;
+      background: none;
+      border: 1px solid var(--color-dim);
+      color: var(--color-dim);
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 9px;
+      letter-spacing: 1px;
+      padding: 4px 0;
+      cursor: pointer;
+      transition: all 0.12s;
+    }
+
+    .api-btn:hover { border-color: var(--color-primary); color: var(--color-primary); }
+
+    /* ── ENDING SCREEN ────────────────────────────────── */
+    #ending-box {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      padding: 16px 0 8px;
+      animation: fadeIn 0.6s ease;
+    }
+
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+    .ending-type {
+      font-size: 10px;
+      letter-spacing: 4px;
+      color: var(--color-dim);
+    }
+
+    .ending-title {
+      font-family: 'VT323', monospace;
+      font-size: 32px;
+      letter-spacing: 4px;
+      color: var(--color-primary);
+      text-shadow: 0 0 20px var(--color-primary);
+      text-align: center;
+    }
+
+    .ending-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 8px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .ending-btn {
+      background: none;
+      border: 1px solid var(--color-primary);
+      color: var(--color-primary);
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 12px;
+      letter-spacing: 2px;
+      padding: 10px 20px;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .ending-btn:hover { background: rgba(255,255,255,0.04); box-shadow: 0 0 12px rgba(255,255,255,0.06); }
+
+    /* ── WHAT-IF PANEL ───────────────────────────────── */
+    #whatif-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .whatif-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--color-border);
+    }
+
+    .whatif-label {
+      font-size: 10px;
+      letter-spacing: 2px;
+      color: var(--color-dim);
+    }
+
+    .whatif-back {
+      background: none;
+      border: 1px solid var(--color-border);
+      color: var(--color-dim);
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 1px;
+      padding: 4px 10px;
+      cursor: pointer;
+      transition: all 0.12s;
+    }
+
+    .whatif-back:hover { border-color: var(--color-primary); color: var(--color-primary); }
+
+    .whatif-prompt {
+      font-size: 10px;
+      color: var(--color-dim);
+      letter-spacing: 2px;
+    }
+
+    .whatif-choice-text {
+      font-size: 13px;
+      color: var(--color-primary);
+      border-left: 3px solid var(--color-primary);
+      padding: 8px 12px;
+      background: rgba(255,255,255,0.02);
+      opacity: 0.75;
+      font-style: italic;
+    }
+
+    .whatif-divider {
+      font-size: 10px;
+      color: var(--color-dim);
+      letter-spacing: 2px;
+      padding-top: 4px;
+      border-top: 1px solid var(--color-border);
+    }
+
+    .whatif-story {
+      font-size: 13px;
+      line-height: 1.8;
+      color: var(--color-dim);
+      white-space: pre-wrap;
+      opacity: 0.85;
+    }
+
+    .whatif-story.typing::after {
+      content: '█';
+      animation: blink 0.7s step-end infinite;
+      color: var(--color-primary);
+    }
+
+    .ghost-node { cursor: pointer; transition: opacity 0.15s; }
+    .ghost-node:hover { opacity: 1 !important; }
+
+    /* ── RESPONSIVE ───────────────────────────────── */
+    @media (max-width: 720px) {
+      #main-layout { grid-template-columns: 1fr; }
+      #sidebar { order: -1; }
+      #title { font-size: 38px; }
+    }
+  </style>
+</head>
+<body class="fantasy">
+<div id="app">
+
+  <!-- HEADER -->
+  <div id="header">
+    <div id="title">TALES UNTOLD</div>
+    <div id="subtitle">AN AI-POWERED ADVENTURE &nbsp;·&nbsp; LEARN HOW AI THINKS</div>
+  </div>
+
+  <!-- TWO-COLUMN LAYOUT -->
+  <div id="main-layout">
+
+    <!-- LEFT: STORY -->
+    <div id="story-col">
+
+      <div class="col-label">
+        <span class="col-label-left">// STORY</span>
+        <div id="process-stages">
+          <div class="process-stage" id="stage-receiving"><span class="stage-dot"></span>RECEIVING</div>
+          <span class="process-arrow">→</span>
+          <div class="process-stage" id="stage-reading"><span class="stage-dot"></span>READING</div>
+          <span class="process-arrow">→</span>
+          <div class="process-stage" id="stage-thinking"><span class="stage-dot"></span>THINKING</div>
+          <span class="process-arrow">→</span>
+          <div class="process-stage" id="stage-writing"><span class="stage-dot"></span>WRITING</div>
+          <span class="process-arrow">→</span>
+          <div class="process-stage" id="stage-complete"><span class="stage-dot"></span>COMPLETE</div>
+        </div>
+        <span id="cost-ticker"></span>
+        <span class="col-label-right" id="turn-display">TURN 1</span>
+      </div>
+
+      <div id="process-description">Waiting for input...</div>
+
+      <div id="story-box" onclick="skipTypewriter()">
+        <div id="story-text">Select a genre on the right, then press START ADVENTURE.
+
+Each choice you make shapes the story — and the drawer below reveals exactly what the AI is doing behind the scenes.</div>
+        <div id="skip-hint">[ CLICK TO SKIP ]</div>
+      </div>
+
+      <div id="no-wrong-hint">// any choice works — the story follows your lead</div>
+      <div id="choices-box">
+        <button id="start-btn" onclick="startStory()">[ START ADVENTURE ]</button>
+      </div>
+
+    </div>
+
+    <!-- RIGHT: SIDEBAR -->
+    <div id="sidebar">
+
+      <!-- GENRE -->
+      <div class="sidebar-section">
+        <div class="sidebar-label">// GENRE</div>
+        <div id="genre-collapsed" onclick="toggleGenreMenu()">
+          <span id="genre-collapsed-label">[ FANTASY ]</span>
+          <span id="genre-change-hint">CHANGE ›</span>
+        </div>
+        <div id="genre-buttons">
+          <button class="genre-btn active" data-genre="fantasy" onclick="setGenre('fantasy', event)">[ FANTASY ]</button>
+          <button class="genre-btn" data-genre="scifi" onclick="setGenre('scifi', event)">[ SCI-FI ]</button>
+          <button class="genre-btn" data-genre="mystery" onclick="setGenre('mystery', event)">[ MYSTERY ]<span class="recommended">START HERE</span></button>
+          <button class="genre-btn" data-genre="horror" onclick="setGenre('horror', event)">[ HORROR ]</button>
+        </div>
+        <div id="genre-lock-msg">// genre locked during story</div>
+      </div>
+
+      <!-- API CONNECTION -->
+      <div class="sidebar-section" id="api-section">
+        <div class="sidebar-label">// API</div>
+        <div id="api-status-row">
+          <span id="api-status-text">DEMO MODE</span>
+          <button id="api-connect-btn" onclick="toggleApiInput()">CONNECT</button>
+        </div>
+        <div id="api-input-wrap">
+          <input type="password" id="api-key-input" placeholder="Gemini API key..." autocomplete="off" />
+          <div class="api-btn-row">
+            <button class="api-btn" onclick="saveApiKey()">[ SAVE ]</button>
+            <button class="api-btn" onclick="clearApiKey()">[ CLEAR ]</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ROBOT BUTTON -->
+      <div class="sidebar-section" id="robot-toggle-wrap">
+        <button id="robot-btn" onclick="openRobotModal()">
+          <img id="robot-sprite" class="robot-sprite" alt="">
+          <span class="robot-btn-text">
+            <span class="robot-btn-arrow">↗</span>
+            <span class="robot-btn-label">// CURIOUS?</span>
+            <span class="robot-btn-title">SEE HOW THE ROBOT WORKS</span>
+          </span>
+        </button>
+        <div id="robot-hint">↑ SEE WHAT JUST HAPPENED</div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ROBOT MODAL -->
+  <div id="robot-modal" onclick="closeRobotModalIfOverlay(event)">
+    <div id="robot-modal-inner">
+      <div id="robot-modal-header">
+        <span>// HOW THE ROBOT WORKS</span>
+        <button id="robot-modal-close" onclick="closeRobotModal()">[ CLOSE ]</button>
+      </div>
+      <div id="drawer-tabs">
+        <button class="drawer-tab active" onclick="switchTab('running')">WHAT'S RUNNING</button>
+        <button class="drawer-tab" onclick="switchTab('remembers')">WHAT THE AI REMEMBERS</button>
+        <button class="drawer-tab" onclick="switchTab('told')">WHAT THE AI WAS TOLD</button>
+        <button class="drawer-tab" onclick="switchTab('cost')">WHAT IT COST</button>
+        <button class="drawer-tab" onclick="switchTab('request')">THE RAW REQUEST</button>
+        <button class="drawer-tab" onclick="switchTab('tree')">STORY TREE</button>
+      </div>
+      <div id="drawer-content"></div>
+    </div>
+  </div>
+
+</div>
+
+<script src="robot-data.js"></script>
+<script>
+  // ── STATE ──────────────────────────────────────────
+  let currentGenre = 'fantasy';
+  let currentTurn = 0;
+  let activeTab = 'running';
+  let conversationHistory = [];
+  let totalTokensIn = 0;
+  let totalTokensOut = 0;
+  let lastApiCall = null;
+  let isTyping = false;
+  let typewriterInterval = null;
+  let pendingChoices = null;
+  let fullPendingText = '';
+  let choiceHistory = [];
+  let apiKey = '';
+  let storyEnded = false;
+
+  // ── JSON FORMAT INSTRUCTIONS ───────────────────────
+  // Appended to system prompts when calling Gemini — not shown in the UI
+  const JSON_INSTRUCTIONS = `
+
+Respond ONLY with valid JSON — no markdown, no extra text.
+
+While the story is ongoing:
+{"story":"3-4 sentences of narrative","choices":["choice 1","choice 2","choice 3"]}
+
+When you decide the story has reached its natural conclusion — you choose when, based on narrative pacing and the player's choices, typically somewhere between 4 and 8 turns:
+{"story":"concluding narrative (4-6 sentences)","choices":[],"ending":true,"ending_type":"one of: triumph / survival / bittersweet / ambiguous / tragedy","ending_title":"DRAMATIC TITLE IN ALL CAPS (4-6 words)"}
+
+Track the player's choices throughout. Their pattern — reckless or careful, bold or hesitant, selfish or noble — should shape the ending type and title. You decide everything about the ending.`;
+
+  // ── API KEY MANAGEMENT ─────────────────────────────
+  function initApiKey() {
+    apiKey = localStorage.getItem('gemini_key') || '';
+    updateApiStatusUI();
+  }
+
+  function toggleApiInput() {
+    document.getElementById('api-input-wrap').classList.toggle('open');
+    if (apiKey) document.getElementById('api-key-input').value = apiKey;
+  }
+
+  function saveApiKey() {
+    const val = document.getElementById('api-key-input').value.trim();
+    if (!val) return;
+    apiKey = val;
+    localStorage.setItem('gemini_key', val);
+    document.getElementById('api-input-wrap').classList.remove('open');
+    updateApiStatusUI();
+  }
+
+  function clearApiKey() {
+    apiKey = '';
+    localStorage.removeItem('gemini_key');
+    document.getElementById('api-key-input').value = '';
+    document.getElementById('api-input-wrap').classList.remove('open');
+    updateApiStatusUI();
+  }
+
+  function updateApiStatusUI() {
+    const statusEl = document.getElementById('api-status-text');
+    const btnEl = document.getElementById('api-connect-btn');
+    if (apiKey) {
+      statusEl.textContent = 'LIVE — GEMINI FLASH';
+      statusEl.classList.add('live');
+      btnEl.textContent = 'CHANGE';
+    } else {
+      statusEl.textContent = 'DEMO MODE';
+      statusEl.classList.remove('live');
+      btnEl.textContent = 'CONNECT';
+    }
+  }
+
+  // ── GEMINI API CALL ────────────────────────────────
+  async function callGeminiApi(messages) {
+    const genre = GENRES[currentGenre];
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
+
+    const contents = messages.map(m => ({
+      role: m.role === 'assistant' ? 'model' : 'user',
+      parts: [{ text: m.content }]
+    }));
+
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        system_instruction: { parts: [{ text: genre.systemPrompt + JSON_INSTRUCTIONS }] },
+        contents,
+        generationConfig: {
+          temperature: genre.temperature,
+          maxOutputTokens: 1500,
+          responseMimeType: 'application/json'
+        }
+      })
+    });
+
+    const json = await res.json();
+    if (!res.ok) throw new Error(json.error?.message || `API error ${res.status}`);
+
+    const text = json.candidates[0].content.parts[0].text;
+    const usage = json.usageMetadata || {};
+    return {
+      parsed: JSON.parse(text),
+      inputTokens: usage.promptTokenCount || 0,
+      outputTokens: usage.candidatesTokenCount || 0
+    };
+  }
+
+  // ── LIVE STAGE RUNNER ──────────────────────────────
+  async function runLiveCall(messages) {
+    setChoicesEnabled(false);
+    storyEnded = false;
+
+    // Fire API and animate stages concurrently
+    const apiPromise = callGeminiApi(messages);
+
+    const stageEls = ['receiving','reading','thinking','writing','complete'];
+    const activateStage = (stage) => {
+      stageEls.forEach((s, idx) => {
+        const el = document.getElementById(`stage-${s}`);
+        el.classList.remove('active','done');
+        if (s === stage) el.classList.add('active');
+        else if (stageEls.indexOf(s) < stageEls.indexOf(stage)) el.classList.add('done');
+      });
+      document.getElementById('process-description').innerHTML = STAGE_DESCRIPTIONS[stage];
+    };
+
+    activateStage('receiving');
+    startRobotAnimation();
+    document.getElementById('robot-hint').classList.add('visible','blinking');
+
+    await delay(700);  activateStage('reading');
+    await delay(900);  activateStage('thinking');
+
+    // Wait for API (minimum 400ms in thinking so it doesn't flash)
+    let result;
+    try {
+      result = await Promise.all([apiPromise, delay(400)]).then(([r]) => r);
+    } catch (err) {
+      activateStage('complete');
+      stopRobotAnimation();
+      document.getElementById('robot-hint').classList.remove('blinking');
+      document.getElementById('process-description').innerHTML = `<span style="color:#ff4444">API ERROR: ${err.message}</span>`;
+      setChoicesEnabled(true);
+      return;
+    }
+
+    totalTokensIn  += result.inputTokens;
+    totalTokensOut += result.outputTokens;
+    lastApiCall = {
+      inputTokens: result.inputTokens,
+      outputTokens: result.outputTokens,
+      payload: { model: 'gemini-1.5-flash', messages }
+    };
+
+    activateStage('writing');
+    currentTurn++;
+    const turnEl = document.getElementById('turn-display');
+    turnEl.textContent = `TURN ${currentTurn}`;
+    turnEl.classList.add('visible');
+
+    handleApiResponse(result.parsed);
+
+    await delay(800);
+    activateStage('complete');
+    stopRobotAnimation();
+    showRobotHint();
+    document.getElementById('robot-hint').classList.remove('blinking');
+    updateCostTicker();
+    if (document.getElementById('robot-modal').classList.contains('open')) renderTab(activeTab);
+  }
+
+  function delay(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+  // ── HANDLE AI RESPONSE ─────────────────────────────
+  function handleApiResponse(data) {
+    if (data.ending) {
+      typeText(data.story, null);
+      // After typewriter finishes, showEnding is called via finishTypewriter
+      pendingEnding = { type: data.ending_type, title: data.ending_title };
+    } else {
+      typeText(data.story, data.choices);
+    }
+  }
+
+  // ── ENDING SCREEN ──────────────────────────────────
+  let pendingEnding = null;
+
+  function showEnding() {
+    const { type, title } = pendingEnding;
+    pendingEnding = null;
+    storyEnded = true;
+
+    const typeLabel = {
+      triumph:    '// ENDING: TRIUMPH',
+      survival:   '// ENDING: SURVIVAL',
+      bittersweet:'// ENDING: BITTERSWEET',
+      ambiguous:  '// ENDING: AMBIGUOUS',
+      tragedy:    '// ENDING: TRAGEDY'
+    }[type] || '// ENDING';
+
+    const box = document.getElementById('choices-box');
+    box.innerHTML = `
+      <div id="ending-box">
+        <div class="ending-type">${typeLabel}</div>
+        <div class="ending-title">${title}</div>
+        <div class="ending-actions">
+          <button class="ending-btn" onclick="replayStory()">[ PLAY AGAIN ]</button>
+          <button class="ending-btn" onclick="openRobotModal(); switchTab('tree')">[ SEE YOUR PATH ]</button>
+        </div>
+      </div>`;
+
+    unlockGenreButtons();
+  }
+
+  function replayStory() {
+    storyEnded = false;
+    pendingEnding = null;
+    document.getElementById('story-text').textContent = 'Select a genre on the right, then press START ADVENTURE.';
+    document.getElementById('choices-box').innerHTML = `<button id="start-btn" onclick="startStory()">[ START ADVENTURE ]</button>`;
+    document.getElementById('turn-display').classList.remove('visible');
+    document.getElementById('cost-ticker').classList.remove('visible');
+    document.getElementById('robot-hint').classList.remove('visible');
+    document.getElementById('no-wrong-hint').classList.remove('visible');
+    ['receiving','reading','thinking','writing','complete'].forEach(s => {
+      document.getElementById(`stage-${s}`).classList.remove('active','done');
+    });
+    document.getElementById('process-description').textContent = 'Waiting for input...';
+    unlockGenreButtons();
+  }
+
+  // ── ROBOT SPRITE ───────────────────────────────────
+  let robotAnimInterval = null;
+  let robotFrameIdx = 0;
+
+  function initRobotSprite() {
+    const img = document.getElementById('robot-sprite');
+    if (img && typeof ROBOT_STATIC !== 'undefined') img.src = ROBOT_STATIC;
+    const wrap = document.getElementById('robot-toggle-wrap');
+    wrap.classList.add('pulsing');
+    wrap.addEventListener('animationend', () => wrap.classList.remove('pulsing'), { once: true });
+  }
+
+  function showRobotHint() {
+    document.getElementById('robot-hint').classList.add('visible');
+  }
+
+  function updateCostTicker() {
+    const cost = ((totalTokensIn * 0.0000005) + (totalTokensOut * 0.000003)).toFixed(4);
+    const el = document.getElementById('cost-ticker');
+    el.innerHTML = `COST SO FAR: <span class="cost-value">$${cost}</span>`;
+    el.classList.add('visible');
+  }
+
+  function startRobotAnimation() {
+    if (typeof ROBOT_FRAMES === 'undefined') return;
+    const img = document.getElementById('robot-sprite');
+    if (!img) return;
+    clearInterval(robotAnimInterval);
+    robotFrameIdx = 0;
+    robotAnimInterval = setInterval(() => {
+      img.src = ROBOT_FRAMES[robotFrameIdx % ROBOT_FRAMES.length];
+      robotFrameIdx++;
+    }, 150);
+  }
+
+  function stopRobotAnimation() {
+    clearInterval(robotAnimInterval);
+    robotAnimInterval = null;
+    const img = document.getElementById('robot-sprite');
+    if (img && typeof ROBOT_STATIC !== 'undefined') img.src = ROBOT_STATIC;
+  }
+
+  // ── GENRE CONFIG ───────────────────────────────────
+  const GENRES = {
+    fantasy: {
+      label: 'FANTASY',
+      model: 'gemini-2.5-flash',
+      temperature: 0.85,
+      systemPrompt: `You are the narrator of a dark fantasy adventure. The player is a wandering scholar who stumbles upon a mystery in an ancient forest kingdom. Your tone is atmospheric, lyrical, and full of wonder. Keep each response to 3-4 sentences of story followed by exactly 3 choices. Format choices as: 1. [choice text]`,
+      opening: `The Whispering Wood has swallowed the last of the daylight. You stand at a fork in the ancient road, your lantern casting trembling shadows against the moss-covered stones. Somewhere ahead, through the tangle of black branches, a light flickers — too steady to be lightning, too cold to be fire.
+
+Your satchel of maps shows nothing beyond this point. The cartographers who came before you never returned.`,
+      choices: ['Follow the cold light deeper into the wood.', 'Search the old stone marker at the fork for inscriptions.', 'Make camp here and wait for dawn.']
+    },
+    scifi: {
+      label: 'SCI-FI',
+      model: 'gemini-2.5-flash',
+      temperature: 0.75,
+      systemPrompt: `You are the narrator of a hard science fiction thriller set aboard a damaged deep-space research station. The player is the station's AI systems engineer. Your tone is precise, tense, and technical. Keep each response to 3-4 sentences of story followed by exactly 3 choices. Format choices as: 1. [choice text]`,
+      opening: `STATION ALERT — SYSTEM DIAGNOSTIC — 04:17:33 UTC
+
+You wake to the sound of hull breach alarms and the smell of burning polymer. Emergency lighting bathes the corridor in red. Your terminal reads: CONTACT WITH EARTH LOST — 14 HOURS AGO.
+
+The rest of the crew is still in cryo. You are the only one awake, and something has been moving through the station's restricted sectors.`,
+      choices: ['Access the security camera logs to find what triggered the alarms.', 'Wake the mission commander from cryo.', 'Lock down restricted sectors and arm yourself first.']
+    },
+    mystery: {
+      label: 'MYSTERY',
+      model: 'gemini-2.5-flash',
+      temperature: 0.70,
+      systemPrompt: `You are the narrator of a noir detective mystery set in a rainy 1940s city. The player is a private investigator. Your tone is dry, observational, and full of subtext. Keep each response to 3-4 sentences of story followed by exactly 3 choices. Format choices as: 1. [choice text]`,
+      opening: `The rain hasn't stopped in three days and neither has the case.
+
+You're standing in the dead man's apartment — Martin Hale, age 52, found by his housekeeper Tuesday morning. The police called it a heart attack. His daughter called you because the safe is empty and her father hadn't visited a doctor in fifteen years.
+
+There's a glass of scotch on the desk. Still half full. Still cold.`,
+      choices: ['Examine the safe more closely.', 'Look through the papers on his desk.', 'Talk to the housekeeper who found him.']
+    },
+    horror: {
+      label: 'HORROR',
+      model: 'gemini-2.5-flash',
+      temperature: 0.90,
+      systemPrompt: `You are the narrator of a psychological horror story. The player has returned to their childhood home after a decade away. Your tone is dread-soaked, unsettling, and full of wrongness. Keep each response to 3-4 sentences of story followed by exactly 3 choices. Format choices as: 1. [choice text]`,
+      opening: `The house looks exactly as you remembered it.
+
+That's the problem. Ten years, and nothing has changed — not the peeling paint on the shutters, not the overgrown garden, not the bicycle rusting by the porch that you left when you were nine. Your mother's car is in the driveway. Your mother has been dead for six years.
+
+The front door is unlocked. The light in the kitchen is on.`,
+      choices: ['Go inside and call out.', 'Check if the car is warm — if it was driven recently.', 'Walk around the back of the house first.']
+    }
+  };
+
+  // ── SIMULATED STORY RESPONSES ──────────────────────
+  const STORY_TURNS = {
+    fantasy: [
+      { text: `You follow the cold light, pushing through branches that seem to recoil from your lantern's warmth. The light leads you to a clearing where a tower of black glass rises from the earth — unmarked on any map, its windows lit from within by that same pale luminescence.\n\nAt its base, a door stands open. Carved above the threshold in a language you half-recognize: "The truth has a price. Pay it willingly or not at all."`, choices: ['Step inside the tower.', 'Study the inscription more carefully — you know this language.', 'Circle the tower, looking for another entrance or a clue about its purpose.'] },
+      { text: `Inside, the tower holds a single circular room. At its center, a pedestal holds an open book — its pages blank except for the last line, which reads: "Ask your question. I have been waiting."\n\nThe air hums. The blank pages begin to fill with handwriting as you approach, as if the book already knows what you came to ask.`, choices: ['Ask about the cartographers who disappeared.', 'Ask what the tower is and who built it.', 'Close the book and leave. Some questions cost too much.'] }
+    ],
+    scifi: [
+      { text: `The security logs show a gap — exactly 14 hours, precisely when contact with Earth was lost. Not a glitch. The deletion is too clean, too precise. Someone with administrator access wiped the footage.\n\nYour access logs show the deletion was authorized by your own credentials. You were in cryo at the time.`, choices: ['Check who else has administrator-level access.', 'Pull the raw sensor data — cameras can be wiped, heat signatures cannot.', 'Go directly to the restricted sector. Whatever is there, you need to see it yourself.'] },
+      { text: `The heat sensors show a trail — something warm has been moving through the station in a pattern. Not random. Not panicked. Methodical. It has visited every lab in sequence, as if following a checklist.\n\nThe trail ends at the biology lab. The biology lab door is sealed from the inside.`, choices: ['Override the seal and open the door.', "Access the biology lab's internal camera before opening anything.", 'Seal the corridor on both sides, containing whatever is inside.'] }
+    ],
+    mystery: [
+      { text: `The safe is a Hartmann & Cole — good lock, better reputation. But the door swings on its hinges without resistance. It wasn't cracked. It was opened correctly, by someone who knew the combination.\n\nInside: a single matchbook from The Meridian Club. Members only, old money, the kind of place that doesn't appear in phone directories.`, choices: ['Pocket the matchbook and head to The Meridian Club.', "Call Hale's daughter — ask if she knows what her father kept in the safe.", 'Check the rest of the apartment for a combination written down somewhere.'] },
+      { text: `Hale's daughter goes quiet on the phone for a long moment. "He kept documents in there," she finally says. "Things he said would protect us if anything ever happened to him." Her voice drops. "He told me about those documents three weeks ago. He'd never mentioned them before."\n\nThree weeks ago. Someone spooked him into making a dead man's switch. Then moved before he could use it.`, choices: ['Ask her who her father had been meeting with lately.', 'Go to The Meridian Club tonight.', "Go back to the police report — look for what they didn't investigate."] }
+    ],
+    horror: [
+      { text: `The car hood is warm. Not hours warm — minutes warm.\n\nYou press your palm flat against the metal and hold it there as the rain soaks through your jacket. The engine ticked twice while you stood there, still cooling. Someone drove here recently. Someone who has a key to a dead woman's car.`, choices: ['Go inside now. You need to know.', 'Check the backseat of the car first.', 'Call the police before doing anything else.'] },
+      { text: `The kitchen light flickers when you push open the back door.\n\nThe table is set for two. Two plates, two glasses of water, two chairs — one of them pulled out slightly, as if someone just stood up. The food on both plates is your mother's recipe. Pot roast with the carrots the way she always did them, slightly overdone, the way you liked them as a child.\n\nIt's still hot.`, choices: ['Call out into the house.', 'Look at the second chair — is there anything on it? Any sign of who sat there?', 'Leave. Get in your car and leave right now.'] }
+    ]
+  };
+
+  // ── WHAT-IF SNIPPETS ───────────────────────────────
+  const WHAT_IF = {
+    fantasy: [
+      `The inscription gave up its meaning reluctantly — old guild-script, used by the cartographers' order three centuries before the roads were laid. A warning: anyone who mapped beyond this point would forget the way home, their memories overwritten by the forest's own geography.\n\nThe missing cartographers weren't dead. They were still out there somewhere, drawing maps of places that didn't exist yet.`,
+      `The tower had a second entrance on its northern face — an iron hatch, freshly disturbed, a ladder descending into cold darkness. At the bottom: a lantern still burning and a leather satchel monogrammed with initials from the missing cartographers' registry.\n\nSomeone had been living down here. The lantern was still warm.`,
+      `You closed the book. The humming didn't stop. On the walk back through the trees you noticed your own map had changed — new roads inked in a hand that wasn't yours, leading to places you hadn't visited yet.\n\nThe book had found a different way to answer your question. It always does.`
+    ],
+    scifi: [
+      `The administrator list had three names besides yours. Two were in cryo. The third — Dr. Vasquez, station biologist — was officially in cryo bay C. Bay C was empty. The unit was cold, but the biometric log showed a voluntary early exit eleven hours before the alarms started.\n\nShe hadn't been taken. She'd left on her own.`,
+      `Infrared told a different story than the cameras. A single heat signature, human-sized, had been moving through the restricted sector for eleven hours in a pattern too deliberate to be random — like something following a checklist. And a second signature, smaller, that appeared twice near the hull and vanished both times.\n\nThe second one had come from outside the station.`,
+      `You cut power to the biology lab and sealed both corridor doors. For six minutes nothing happened.\n\nThen the lights inside went out — manually, from within. Whatever was in there had found the override panel. It knew what sealed doors meant. It was making a decision about what to do next.`
+    ],
+    mystery: [
+      `The combination was hidden in Hale's address book, disguised as a phone number — area code 412. Pittsburgh. He'd never been to Pittsburgh.\n\nBesides it, a single name: W. Carver. No first name. No number. Just the name, circled twice, with a date from three weeks ago. The same week his daughter said he'd changed.`,
+      `His daughter's voice shifted when you pressed her. Not surprised — more like she'd been expecting the question. "He told me that if anyone ever asked about those documents, they were already gone." She paused. "He also said to trust whoever called me from a payphone."\n\nYou looked at the receiver in your hand.`,
+      `Page seven of the police report had been physically removed — not redacted, cut. The page numbers jumped and nobody had flagged it. Old habit, older than photocopiers: pull the original, leave the remainder, hope nobody counts.\n\nSomebody had been in that file before you. Somebody with access and a reason.`
+    ],
+    horror: [
+      `The backseat held a single child's shoe — white, velcro strap, small. Your mother didn't have grandchildren. You stared at it in the rain long enough for the kitchen light to come on behind you.\n\nYou hadn't turned it on. It had been dark when you arrived.`,
+      `The dispatcher took your call on the second ring. You gave the address. She read it back, then paused. "Your mother phoned us this morning. She asked us to send someone if anyone reported trouble here tonight."\n\nAnother pause. "She said you'd come eventually."`,
+      `The carrots were overdone exactly the way you'd liked them as a child — a detail you'd never told anyone, a detail only she had known. You stood in the doorway long enough to understand what that meant.\n\nThen the empty chair scraped slowly back under the table. As if something had just sat down to wait for you.`
+    ]
+  };
+
+  // ── GENRE ──────────────────────────────────────────
+  function toggleGenreMenu() {
+    if (currentTurn > 0) {
+      const msg = document.getElementById('genre-lock-msg');
+      msg.classList.add('visible');
+      setTimeout(() => msg.classList.remove('visible'), 2200);
+      return;
+    }
+    document.getElementById('genre-buttons').classList.toggle('open');
+  }
+
+  function setGenre(genre, e) {
+    if (currentTurn > 0) {
+      const msg = document.getElementById('genre-lock-msg');
+      msg.classList.add('visible');
+      setTimeout(() => msg.classList.remove('visible'), 2200);
+      return;
+    }
+    currentGenre = genre;
+    document.body.className = genre;
+    document.querySelectorAll('.genre-btn').forEach(btn => btn.classList.remove('active', 'locked'));
+    e.target.classList.add('active');
+    const labels = { fantasy: '[ FANTASY ]', scifi: '[ SCI-FI ]', mystery: '[ MYSTERY ]', horror: '[ HORROR ]' };
+    document.getElementById('genre-collapsed-label').textContent = labels[genre];
+    document.getElementById('genre-buttons').classList.remove('open');
+    if (document.getElementById('robot-modal').classList.contains('open')) renderTab(activeTab);
+  }
+
+  function lockGenreButtons() {
+    document.querySelectorAll('.genre-btn').forEach(btn => { if (!btn.classList.contains('active')) btn.classList.add('locked'); });
+    document.getElementById('genre-change-hint').style.display = 'none';
+  }
+
+  function unlockGenreButtons() {
+    document.querySelectorAll('.genre-btn').forEach(btn => btn.classList.remove('locked'));
+    document.getElementById('genre-change-hint').style.display = '';
+  }
+
+  // ── ROBOT MODAL ────────────────────────────────────
+  function openRobotModal() {
+    document.getElementById('robot-modal').classList.add('open');
+    renderTab(activeTab);
+  }
+
+  function closeRobotModal() {
+    document.getElementById('robot-modal').classList.remove('open');
+  }
+
+  function closeRobotModalIfOverlay(e) {
+    if (e.target === document.getElementById('robot-modal')) closeRobotModal();
+  }
+
+  function switchTab(tabId) {
+    activeTab = tabId;
+    document.querySelectorAll('.drawer-tab').forEach(t => t.classList.remove('active'));
+    const tabMap = { running: 0, remembers: 1, told: 2, cost: 3, request: 4, tree: 5 };
+    document.querySelectorAll('.drawer-tab')[tabMap[tabId]].classList.add('active');
+    renderTab(tabId);
+  }
+
+  function renderTab(tabId) {
+    const el = document.getElementById('drawer-content');
+    const genre = GENRES[currentGenre];
+
+    if (tabId === 'running') {
+      el.innerHTML = `
+        <p class="panel-note">The current settings the AI is running with for this story.</p>
+        <div class="stat-row"><span class="stat-label">MODEL</span><span class="stat-value">${genre.model}</span></div>
+        <div class="stat-row"><span class="stat-label">TEMPERATURE</span><span class="stat-value">${genre.temperature} — higher = more creative, lower = more predictable</span></div>
+        <div class="stat-row"><span class="stat-label">GENRE</span><span class="stat-value">${genre.label}</span></div>
+        <div class="stat-row"><span class="stat-label">CURRENT TURN</span><span class="stat-value">${currentTurn}</span></div>
+        <div class="stat-row"><span class="stat-label">MESSAGES IN MEMORY</span><span class="stat-value">${conversationHistory.length}</span></div>
+        <div class="stat-row"><span class="stat-label">API STATUS</span><span class="stat-value">DEMO MODE — add your API key to go live</span></div>`;
+
+    } else if (tabId === 'told') {
+      el.innerHTML = `
+        <p class="panel-note">This is the "system prompt" — a set of instructions sent to the AI before every single request. It tells the AI what role to play, what tone to use, and what the rules are. You never see it in the story, but it shapes everything.</p>
+        <pre>${genre.systemPrompt}</pre>`;
+
+    } else if (tabId === 'remembers') {
+      if (conversationHistory.length === 0) {
+        el.innerHTML = `<p class="panel-note">No history yet — start the adventure and make a choice to see this fill up.</p><pre style="color:var(--color-dim)">The AI doesn't have a persistent memory between sessions. Instead, the entire conversation is re-sent with every new request. Watch this grow as you play.</pre>`;
+      } else {
+        const formatted = conversationHistory.map((msg, i) =>
+          `[${i + 1}] ${msg.role.toUpperCase()}\n${msg.content}`
+        ).join('\n\n─────────────────\n\n');
+        el.innerHTML = `
+          <p class="panel-note">Everything you see below gets sent to the AI with every new request. This is how it "remembers" what happened — there's no magic, just a growing list of messages. Notice how it gets longer each turn.</p>
+          <pre>${formatted}</pre>`;
+      }
+
+    } else if (tabId === 'cost') {
+      const cost = ((totalTokensIn * 0.0000005) + (totalTokensOut * 0.000003)).toFixed(5);
+      el.innerHTML = `
+        <p class="panel-note">AI doesn't think in words — it thinks in "tokens," which are small chunks of text (roughly 1 token per word). Every token costs a tiny fraction of a cent. Watch these numbers grow as the story gets longer.</p>
+        <div class="stat-row"><span class="stat-label">LAST TURN — SENT IN</span><span class="stat-value">${lastApiCall ? lastApiCall.inputTokens + ' tokens' : '—'}</span></div>
+        <div class="stat-row"><span class="stat-label">LAST TURN — RECEIVED</span><span class="stat-value">${lastApiCall ? lastApiCall.outputTokens + ' tokens' : '—'}</span></div>
+        <div class="stat-row"><span class="stat-label">TOTAL SENT IN</span><span class="stat-value">${totalTokensIn} tokens</span></div>
+        <div class="stat-row"><span class="stat-label">TOTAL RECEIVED</span><span class="stat-value">${totalTokensOut} tokens</span></div>
+        <div class="stat-row"><span class="stat-label">ESTIMATED COST</span><span class="stat-value">$${cost}</span></div>`;
+
+    } else if (tabId === 'request') {
+      if (!lastApiCall) {
+        el.innerHTML = `<p class="panel-note">Start the adventure to see the raw JSON request sent to the AI.</p><pre style="color:var(--color-dim)">This will show the exact data package sent to the AI — model, temperature, system prompt, and full message history all bundled together.</pre>`;
+      } else {
+        el.innerHTML = `
+          <p class="panel-note">This is the exact data package sent to the AI. Every single turn, a package like this gets assembled and fired off. The response comes back as JSON too — we just pull out the story text and display it for you.</p>
+          <pre>${JSON.stringify(lastApiCall.payload, null, 2)}</pre>`;
+      }
+
+    } else if (tabId === 'tree') {
+      renderStoryTree(el);
+    }
+  }
+
+  // ── STORY TREE ─────────────────────────────────────
+  function renderStoryTree(el) {
+    if (choiceHistory.length === 0) {
+      el.innerHTML = `<p class="panel-note">Start the adventure and make choices to see your story path build here. Every turn, three branches appear — you can only walk one.</p>
+        <pre style="color:var(--color-dim)">   [START]
+    /  |  \\
+   ○   ●   ○   ← your choice
+       |
+   [TURN 1]
+    /  |  \\
+   ○   ○   ●   ← your next choice
+           |
+       [TURN 2]
+         ...</pre>`;
+      return;
+    }
+
+    const W = 360;
+    const cx = W / 2;
+    const spineR = 16;
+    const choiceR = 10;
+    const spread = 108;
+    const rowH = 96;
+    const topPad = 28;
+    const totalH = topPad + spineR + choiceHistory.length * rowH + spineR + 16;
+
+    // positions for 3 choices: left, center, right
+    const choiceXs = [cx - spread, cx, cx + spread];
+
+    let linesHTML = '';
+    let nodesHTML = '';
+
+    // Opening node
+    let prevY = topPad + spineR;
+    nodesHTML += svgCircle(cx, prevY, spineR, true);
+    nodesHTML += svgLabel(cx, prevY, 'START');
+
+    choiceHistory.forEach((entry, i) => {
+      const branchY = prevY + rowH * 0.42;
+      const nextSpineY = prevY + rowH;
+
+      choiceXs.forEach((tx, ci) => {
+        const chosen = ci === entry.chosenIndex;
+        // Line from spine node to choice node
+        linesHTML += svgLine(cx, prevY + spineR, tx, branchY - choiceR, chosen);
+        // Choice node
+        nodesHTML += svgCircle(tx, branchY, choiceR, chosen, i, ci);
+        if (chosen) {
+          // Label: truncated choice text
+          const label = entry.choiceText.length > 22 ? entry.choiceText.slice(0, 21) + '…' : entry.choiceText;
+          nodesHTML += `<text x="${tx + choiceR + 4}" y="${branchY + 4}" fill="var(--color-primary)" font-size="8" font-family="Share Tech Mono,monospace" opacity="0.7">${escSVG(label)}</text>`;
+          // Line from chosen node back down to next spine node
+          linesHTML += svgLine(tx, branchY + choiceR, cx, nextSpineY - spineR, true);
+        } else {
+          // Ghost label hint
+          nodesHTML += `<text x="${tx}" y="${branchY + choiceR + 11}" text-anchor="middle" fill="var(--color-dim)" font-size="7" font-family="Share Tech Mono,monospace" opacity="0.5" class="ghost-node" data-turn="${i}" data-ci="${ci}">WHAT IF?</text>`;
+        }
+      });
+
+      // Next spine node
+      nodesHTML += svgCircle(cx, nextSpineY, spineR, true);
+      nodesHTML += svgLabel(cx, nextSpineY, `T${i + 1}`);
+      prevY = nextSpineY;
+    });
+
+    el.innerHTML = `
+      <p class="panel-note">Every turn, three paths branch — you can only walk one. The path you chose glows. The roads not taken are still there, dimmed — <span style="color:var(--color-primary)">click any ghost node to see how it might have gone.</span></p>
+      <div style="overflow-y:auto;padding-top:8px;">
+        <svg width="${W}" height="${totalH}" viewBox="0 0 ${W} ${totalH}" style="display:block;margin:0 auto;">
+          <defs>
+            <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+              <feGaussianBlur stdDeviation="2.5" result="blur"/>
+              <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+            </filter>
+          </defs>
+          ${linesHTML}${nodesHTML}
+        </svg>
+      </div>`;
+
+    el.querySelectorAll('.ghost-node').forEach(node => {
+      node.addEventListener('click', () => {
+        showWhatIf(parseInt(node.dataset.turn), parseInt(node.dataset.ci), el);
+      });
+    });
+  }
+
+  // ── WHAT-IF PANEL ──────────────────────────────────
+  function showWhatIf(turnIdx, ci, el) {
+    const entry = choiceHistory[turnIdx];
+    const choiceText = entry.allChoices[ci];
+    const snippets = WHAT_IF[currentGenre];
+    const snippet = snippets[(turnIdx * 2 + ci) % snippets.length];
+
+    el.innerHTML = `
+      <div id="whatif-panel">
+        <div class="whatif-header">
+          <span class="whatif-label">// ROAD NOT TAKEN — TURN ${turnIdx + 1}</span>
+          <button class="whatif-back" onclick="switchTab('tree')">← BACK TO TREE</button>
+        </div>
+        <div class="whatif-prompt">IF YOU HAD CHOSEN:</div>
+        <div class="whatif-choice-text">"${escSVG(choiceText)}"</div>
+        <div class="whatif-divider">// THE STORY MIGHT HAVE CONTINUED...</div>
+        <div id="whatif-text" class="whatif-story typing"></div>
+      </div>`;
+
+    const textEl = el.querySelector('#whatif-text');
+    let i = 0;
+    const iv = setInterval(() => {
+      textEl.textContent += snippet[i++];
+      if (i >= snippet.length) { clearInterval(iv); textEl.classList.remove('typing'); }
+    }, 14);
+  }
+
+  function svgLine(x1, y1, x2, y2, chosen) {
+    return chosen
+      ? `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="var(--color-primary)" stroke-width="2"/>`
+      : `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="var(--color-dim)" stroke-width="1" stroke-dasharray="3,4" opacity="0.45"/>`;
+  }
+
+  function svgCircle(x, y, r, chosen, turnIdx, ci) {
+    if (chosen) {
+      return `<circle cx="${x}" cy="${y}" r="${r}" fill="var(--color-bg)" stroke="var(--color-primary)" stroke-width="2" filter="url(#glow)"/>`;
+    }
+    const hasData = turnIdx !== undefined && ci !== undefined && choiceHistory[turnIdx]?.allChoices;
+    return `<circle cx="${x}" cy="${y}" r="${r}" fill="var(--color-bg)" stroke="var(--color-dim)" stroke-width="1" opacity="0.4"${hasData ? ` class="ghost-node" data-turn="${turnIdx}" data-ci="${ci}"` : ''} />`;
+  }
+
+  function svgLabel(x, y, text) {
+    return `<text x="${x}" y="${y + 4}" text-anchor="middle" fill="var(--color-primary)" font-size="9" font-family="Share Tech Mono,monospace">${text}</text>`;
+  }
+
+  function escSVG(str) {
+    return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  // ── PROCESS STAGES ─────────────────────────────────
+  const STAGE_DESCRIPTIONS = {
+    receiving: `Your choice and the <span>full conversation history</span> are packaged into a request.`,
+    reading:   `The AI reads the <span>system prompt</span> and every message in the conversation so far.`,
+    thinking:  `The model <span>predicts likely next tokens</span> — no planning, just word-by-word generation.`,
+    writing:   `The AI <span>streams the response</span> one token at a time until the scene is complete.`,
+    complete:  `Done. <span>Story and context updated.</span> Click the robot to see what happened.`
+  };
+
+  // ── SIMULATE API CALL ──────────────────────────────
+  function simulateApiCall(storyText, choices) {
+    setChoicesEnabled(false);
+    const inputTokens = 180 + conversationHistory.length * 85 + Math.floor(Math.random() * 40);
+    const outputTokens = 120 + Math.floor(Math.random() * 60);
+    totalTokensIn += inputTokens;
+    totalTokensOut += outputTokens;
+    lastApiCall = buildApiCallRecord(storyText, inputTokens, outputTokens);
+
+    const stages = ['receiving', 'reading', 'thinking', 'writing', 'complete'];
+    const delays = [0, 700, 1600, 2800, 4800];
+
+    stages.forEach((stage, i) => {
+      setTimeout(() => {
+        stages.forEach(s => {
+          const el = document.getElementById(`stage-${s}`);
+          el.classList.remove('active', 'done');
+          if (s === stage) el.classList.add('active');
+          else if (stages.indexOf(s) < i) el.classList.add('done');
+        });
+        document.getElementById('process-description').innerHTML = STAGE_DESCRIPTIONS[stage];
+
+        if (stage === 'receiving') {
+          startRobotAnimation();
+          const hint = document.getElementById('robot-hint');
+          hint.classList.add('visible', 'blinking');
+        }
+        if (stage === 'writing') {
+          currentTurn++;
+          const turnEl = document.getElementById('turn-display');
+          turnEl.textContent = `TURN ${currentTurn}`;
+          turnEl.classList.add('visible');
+          typeText(storyText, choices);
+        }
+        if (stage === 'complete') {
+          stopRobotAnimation();
+          showRobotHint();
+          document.getElementById('robot-hint').classList.remove('blinking');
+          updateCostTicker();
+          if (document.getElementById('robot-modal').classList.contains('open')) renderTab(activeTab);
+        }
+      }, delays[i]);
+    });
+  }
+
+  // ── START / CHOICE ─────────────────────────────────
+  function startStory() {
+    currentTurn = 0;
+    conversationHistory = [];
+    choiceHistory = [];
+    totalTokensIn = 0;
+    totalTokensOut = 0;
+    lastApiCall = null;
+    storyEnded = false;
+    pendingEnding = null;
+    lockGenreButtons();
+
+    if (apiKey) {
+      // Live: seed with opening from GENRES, then let AI take over
+      const genre = GENRES[currentGenre];
+      conversationHistory = [{ role: 'user', content: '[START STORY]' }];
+      runLiveCall(conversationHistory);
+    } else {
+      simulateApiCall(GENRES[currentGenre].opening, GENRES[currentGenre].choices);
+    }
+  }
+
+  function makeChoice(choiceIndex) {
+    document.getElementById('no-wrong-hint').classList.remove('visible');
+    const allChoices = [...document.querySelectorAll('.choice-btn')].map(b => b.querySelector('.choice-text').textContent.trim());
+    const choiceText = allChoices[choiceIndex];
+    choiceHistory.push({ chosenIndex: choiceIndex, choiceText, allChoices });
+    conversationHistory.push({ role: 'assistant', content: document.getElementById('story-text').textContent });
+    conversationHistory.push({ role: 'user', content: `Choice ${choiceIndex + 1}: ${choiceText}` });
+
+    if (apiKey) {
+      runLiveCall(conversationHistory);
+    } else {
+      const turns = STORY_TURNS[currentGenre];
+      const turnData = turns[Math.min(currentTurn - 1, turns.length - 1)];
+      simulateApiCall(turnData.text, turnData.choices);
+    }
+  }
+
+  // ── TYPEWRITER ─────────────────────────────────────
+  function typeText(text, choices) {
+    const el = document.getElementById('story-text');
+    const box = document.getElementById('story-box');
+    el.textContent = '';
+    el.classList.add('typing');
+    box.classList.add('clickable');
+    isTyping = true;
+    fullPendingText = text;
+    pendingChoices = choices;
+    let i = 0;
+    typewriterInterval = setInterval(() => {
+      el.textContent += text[i++];
+      if (i >= text.length) finishTypewriter(choices);
+    }, 11);
+  }
+
+  function skipTypewriter() {
+    if (!isTyping) return;
+    finishTypewriter(pendingChoices);
+  }
+
+  function finishTypewriter(choices) {
+    if (typewriterInterval) clearInterval(typewriterInterval);
+    typewriterInterval = null;
+    isTyping = false;
+    const el = document.getElementById('story-text');
+    const box = document.getElementById('story-box');
+    el.textContent = fullPendingText;
+    el.classList.remove('typing');
+    box.classList.remove('clickable');
+    if (pendingEnding) {
+      showEnding();
+    } else {
+      renderChoices(choices);
+      setChoicesEnabled(true);
+      if (currentTurn === 1) document.getElementById('no-wrong-hint').classList.add('visible');
+    }
+  }
+
+  // ── RENDER CHOICES ─────────────────────────────────
+  function renderChoices(choices) {
+    const box = document.getElementById('choices-box');
+    box.innerHTML = '';
+    choices.forEach((choice, i) => {
+      const btn = document.createElement('button');
+      btn.className = 'choice-btn';
+      btn.innerHTML = `<span class="choice-num">${i + 1}.</span><span class="choice-text">${choice.replace(/^\d+\.\s*/, '')}</span>`;
+      btn.onclick = () => makeChoice(i);
+      box.appendChild(btn);
+    });
+  }
+
+  function setChoicesEnabled(enabled) {
+    document.querySelectorAll('.choice-btn').forEach(btn => btn.disabled = !enabled);
+  }
+
+  function buildApiCallRecord(storyText, inputTokens, outputTokens) {
+    const genre = GENRES[currentGenre];
+    const messages = [...conversationHistory, { role: 'assistant', content: storyText }];
+    return {
+      inputTokens, outputTokens,
+      payload: {
+        model: genre.model,
+        max_tokens: 1024,
+        temperature: genre.temperature,
+        system: genre.systemPrompt,
+        messages: messages.length > 0 ? messages : [{ role: 'user', content: '[START STORY]' }]
+      }
+    };
+  }
+
+  document.addEventListener('DOMContentLoaded', () => { initRobotSprite(); initApiKey(); });
+</script>
+</body>
+</html>
