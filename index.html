@@ -347,34 +347,45 @@
     }
 
     /* ── GENRE SELECTOR ───────────────────────────── */
-    #genre-collapsed {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      cursor: pointer;
-      padding: 2px 0;
-    }
-
-    #genre-collapsed-label {
-      color: var(--color-primary);
-      font-size: 13px;
-      letter-spacing: 2px;
-    }
-
-    #genre-change-hint {
-      color: var(--color-dim);
-      font-size: 10px;
-      letter-spacing: 1px;
-    }
-
     #genre-buttons {
-      display: none;
+      display: flex;
       flex-direction: column;
       gap: 5px;
-      margin-top: 10px;
     }
 
-    #genre-buttons.open { display: flex; }
+    .genre-btn.active.locked { opacity: 0.5; cursor: not-allowed; }
+    .genre-btn.active.locked:hover { border-left-width: 4px; padding-left: 8px; background: rgba(255,255,255,0.03); color: var(--color-primary); border-left-color: var(--color-primary); }
+
+    #start-over-btn {
+      display: none;
+      background: none;
+      border: 1px solid var(--color-dim);
+      border-left: 2px solid var(--color-primary);
+      color: var(--color-dim);
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 2px;
+      padding: 7px 10px;
+      cursor: pointer;
+      transition: all 0.12s;
+      text-align: left;
+      width: 100%;
+      margin-top: 8px;
+    }
+
+    #start-over-btn:hover { color: var(--color-primary); border-color: var(--color-primary); background: rgba(255,255,255,0.02); }
+
+    #genre-lock-msg {
+      font-size: 10px;
+      color: var(--color-dim);
+      letter-spacing: 1px;
+      margin-top: 6px;
+      min-height: 14px;
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+
+    #genre-lock-msg.visible { opacity: 1; }
 
     .genre-btn {
       background: none;
@@ -408,18 +419,6 @@
 
     .genre-btn.active .recommended,
     .genre-btn:hover .recommended { color: var(--color-primary); border-color: var(--color-primary); }
-
-    #genre-lock-msg {
-      font-size: 10px;
-      color: var(--color-dim);
-      letter-spacing: 1px;
-      margin-top: 8px;
-      min-height: 14px;
-      opacity: 0;
-      transition: opacity 0.3s;
-    }
-
-    #genre-lock-msg.visible { opacity: 1; }
 
     /* ── ROBOT BUTTON ─────────────────────────────── */
     #robot-btn {
@@ -754,6 +753,56 @@
     .ghost-node { cursor: pointer; transition: opacity 0.15s; }
     .ghost-node:hover { opacity: 1 !important; }
 
+    /* ── COFFEE BUTTON ───────────────────────────── */
+    #coffee-btn {
+      display: block;
+      border: 1px solid var(--color-dim);
+      border-left: 3px solid var(--color-primary);
+      color: var(--color-primary);
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 1px;
+      padding: 12px 14px;
+      text-decoration: none;
+      transition: all 0.15s;
+      line-height: 1.5;
+      box-shadow: 0 0 10px rgba(51,255,51,0.08), inset 0 0 10px rgba(51,255,51,0.03);
+    }
+
+    #coffee-btn:hover {
+      border-color: var(--color-primary);
+      border-left-width: 4px;
+      background: rgba(255,255,255,0.02);
+      box-shadow: 0 0 18px rgba(51,255,51,0.15), inset 0 0 12px rgba(51,255,51,0.05);
+    }
+
+    .coffee-label {
+      font-size: 10px;
+      color: var(--color-dim);
+      letter-spacing: 2px;
+      display: block;
+      margin-bottom: 3px;
+    }
+
+    .coffee-action {
+      color: var(--color-primary);
+      font-size: 12px;
+      letter-spacing: 1px;
+      display: block;
+    }
+
+    .coffee-sub {
+      font-size: 9px;
+      color: var(--color-dim);
+      letter-spacing: 1px;
+      display: block;
+      margin-top: 4px;
+      opacity: 0.7;
+    }
+
+    /* hide the default BMC floating button */
+    .bmc-btn-container, #bmc-wbtn { display: none !important; }
+
     /* ── RESPONSIVE ───────────────────────────────── */
     @media (max-width: 720px) {
       #main-layout { grid-template-columns: 1fr; }
@@ -816,10 +865,6 @@ Each choice you make shapes the story — and the drawer below reveals exactly w
       <!-- GENRE -->
       <div class="sidebar-section">
         <div class="sidebar-label">// GENRE</div>
-        <div id="genre-collapsed" onclick="toggleGenreMenu()">
-          <span id="genre-collapsed-label">[ FANTASY ]</span>
-          <span id="genre-change-hint">CHANGE ›</span>
-        </div>
         <div id="genre-buttons">
           <button class="genre-btn active" data-genre="fantasy" onclick="setGenre('fantasy', event)">[ FANTASY ]</button>
           <button class="genre-btn" data-genre="scifi" onclick="setGenre('scifi', event)">[ SCI-FI ]</button>
@@ -827,8 +872,19 @@ Each choice you make shapes the story — and the drawer below reveals exactly w
           <button class="genre-btn" data-genre="horror" onclick="setGenre('horror', event)">[ HORROR ]</button>
         </div>
         <div id="genre-lock-msg">// genre locked during story</div>
+        <button id="start-over-btn" onclick="replayStory()">[ START OVER ]</button>
       </div>
 
+
+      <!-- COFFEE -->
+      <div class="sidebar-section">
+        <div class="sidebar-label">// SUPPORT THIS PROJECT</div>
+        <a id="coffee-btn" href="https://www.buymeacoffee.com/AndrewTech" target="_blank" rel="noopener">
+          <span class="coffee-label">ENJOYING THE ADVENTURE?</span>
+          <span class="coffee-action">[ BUY ME A COFFEE ]</span>
+          <span class="coffee-sub">keeps the AI running ↗</span>
+        </a>
+      </div>
 
       <!-- ROBOT BUTTON -->
       <div class="sidebar-section" id="robot-toggle-wrap">
@@ -867,6 +923,7 @@ Each choice you make shapes the story — and the drawer below reveals exactly w
 
 </div>
 
+<script type="text/javascript" src="https://cdnjs.buymeacoffee.com/1.0.0/button.prod.min.js" data-name="bmc-button" data-slug="AndrewTech" data-color="#FFDD00" data-emoji="" data-font="Cookie" data-text="Buy me a coffee" data-outline-color="#000000" data-font-color="#000000" data-coffee-color="#ffffff"></script>
 <script src="robot-data.js"></script>
 <script>
   // ── CONFIG ─────────────────────────────────────────
@@ -932,7 +989,8 @@ Track the player's choices throughout. Their pattern — reckless or careful, bo
     return {
       parsed: JSON.parse(text),
       inputTokens: usage.promptTokenCount || 0,
-      outputTokens: usage.candidatesTokenCount || 0
+      outputTokens: usage.candidatesTokenCount || 0,
+      modelVersion: json.modelVersion || null
     };
   }
 
@@ -980,7 +1038,8 @@ Track the player's choices throughout. Their pattern — reckless or careful, bo
     lastApiCall = {
       inputTokens: result.inputTokens,
       outputTokens: result.outputTokens,
-      payload: { model: 'gemini-1.5-flash', messages }
+      modelVersion: result.modelVersion,
+      payload: { model: 'gemini-2.5-flash', messages }
     };
 
     activateStage('writing');
@@ -1196,41 +1255,23 @@ The front door is unlocked. The light in the kitchen is on.`,
   };
 
   // ── GENRE ──────────────────────────────────────────
-  function toggleGenreMenu() {
-    if (currentTurn > 0) {
-      const msg = document.getElementById('genre-lock-msg');
-      msg.classList.add('visible');
-      setTimeout(() => msg.classList.remove('visible'), 2200);
-      return;
-    }
-    document.getElementById('genre-buttons').classList.toggle('open');
-  }
-
   function setGenre(genre, e) {
-    if (currentTurn > 0) {
-      const msg = document.getElementById('genre-lock-msg');
-      msg.classList.add('visible');
-      setTimeout(() => msg.classList.remove('visible'), 2200);
-      return;
-    }
+    if (currentTurn > 0) return;
     currentGenre = genre;
     document.body.className = genre;
     document.querySelectorAll('.genre-btn').forEach(btn => btn.classList.remove('active', 'locked'));
-    e.target.classList.add('active');
-    const labels = { fantasy: '[ FANTASY ]', scifi: '[ SCI-FI ]', mystery: '[ MYSTERY ]', horror: '[ HORROR ]' };
-    document.getElementById('genre-collapsed-label').textContent = labels[genre];
-    document.getElementById('genre-buttons').classList.remove('open');
+    e.currentTarget.classList.add('active');
     if (document.getElementById('robot-modal').classList.contains('open')) renderTab(activeTab);
   }
 
   function lockGenreButtons() {
-    document.querySelectorAll('.genre-btn').forEach(btn => { if (!btn.classList.contains('active')) btn.classList.add('locked'); });
-    document.getElementById('genre-change-hint').style.display = 'none';
+    document.querySelectorAll('.genre-btn').forEach(btn => btn.classList.add('locked'));
+    document.getElementById('start-over-btn').style.display = 'block';
   }
 
   function unlockGenreButtons() {
     document.querySelectorAll('.genre-btn').forEach(btn => btn.classList.remove('locked'));
-    document.getElementById('genre-change-hint').style.display = '';
+    document.getElementById('start-over-btn').style.display = 'none';
   }
 
   // ── ROBOT MODAL ────────────────────────────────────
@@ -1262,7 +1303,7 @@ The front door is unlocked. The light in the kitchen is on.`,
     if (tabId === 'running') {
       el.innerHTML = `
         <p class="panel-note">The current settings the AI is running with for this story.</p>
-        <div class="stat-row"><span class="stat-label">MODEL</span><span class="stat-value">${genre.model}</span></div>
+        <div class="stat-row"><span class="stat-label">MODEL</span><span class="stat-value">${lastApiCall?.modelVersion || genre.model}</span></div>
         <div class="stat-row"><span class="stat-label">TEMPERATURE</span><span class="stat-value">${genre.temperature} — higher = more creative, lower = more predictable</span></div>
         <div class="stat-row"><span class="stat-label">GENRE</span><span class="stat-value">${genre.label}</span></div>
         <div class="stat-row"><span class="stat-label">CURRENT TURN</span><span class="stat-value">${currentTurn}</span></div>
