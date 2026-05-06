@@ -57,12 +57,25 @@
 
     /* ── HEADER ───────────────────────────────────── */
     #header {
-      text-align: center;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
       margin-bottom: 20px;
       padding-bottom: 14px;
       border-bottom: 1px solid var(--color-border);
       flex-shrink: 0;
+      gap: 16px;
     }
+
+    #header-left, #header-right {
+      flex: 0 0 160px;
+      display: flex;
+      align-items: center;
+    }
+
+    #header-right { justify-content: flex-end; }
+
+    #header-center { text-align: center; flex: 1; }
 
     #title {
       font-family: 'VT323', monospace;
@@ -78,6 +91,74 @@
       letter-spacing: 3px;
       margin-top: 4px;
     }
+
+    #home-btn {
+      display: inline-block;
+      border: 1px solid var(--color-dim);
+      border-left: 3px solid var(--color-primary);
+      color: var(--color-dim);
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 1px;
+      padding: 8px 12px;
+      text-decoration: none;
+      transition: all 0.15s;
+      line-height: 1.4;
+    }
+
+    #home-btn:hover {
+      color: var(--color-primary);
+      border-color: var(--color-primary);
+      background: rgba(255,255,255,0.02);
+    }
+
+    #home-btn .home-label {
+      display: block;
+      font-size: 9px;
+      color: var(--color-dim);
+      letter-spacing: 2px;
+      margin-bottom: 2px;
+    }
+
+    #coffee-btn {
+      display: inline-block;
+      border: 1px solid var(--color-dim);
+      border-right: 3px solid var(--color-primary);
+      color: var(--color-dim);
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 0px;
+      padding: 8px 12px;
+      text-decoration: none;
+      transition: all 0.15s;
+      line-height: 1.4;
+      text-align: right;
+      box-shadow: 0 0 10px rgba(51,255,51,0.08), inset 0 0 10px rgba(51,255,51,0.03);
+    }
+
+    #coffee-btn:hover {
+      color: var(--color-primary);
+      border-color: var(--color-primary);
+      background: rgba(255,255,255,0.02);
+      box-shadow: 0 0 18px rgba(51,255,51,0.15), inset 0 0 12px rgba(51,255,51,0.05);
+    }
+
+    .coffee-label {
+      display: block;
+      font-size: 9px;
+      color: var(--color-dim);
+      letter-spacing: 2px;
+      margin-bottom: 2px;
+    }
+
+    .coffee-action {
+      color: var(--color-primary);
+      font-size: 11px;
+      display: block;
+    }
+
+    /* hide the default BMC floating button */
+    .bmc-btn-container, #bmc-wbtn { display: none !important; }
 
     /* ── TWO-COLUMN LAYOUT ────────────────────────── */
     #main-layout {
@@ -185,6 +266,20 @@
     .process-stage.done { opacity: 0.25; }
     .process-stage.done .stage-dot { background: var(--color-dim); border-color: var(--color-dim); }
 
+    #process-stages.clickable,
+    #process-description.clickable {
+      cursor: pointer;
+    }
+
+    #process-stages.clickable:hover .process-stage.active,
+    #process-stages.clickable:hover .process-stage {
+      opacity: 0.75;
+    }
+
+    #process-description.clickable:hover {
+      color: var(--color-primary);
+    }
+
     #process-description {
       font-size: 11px;
       color: var(--color-dim);
@@ -192,6 +287,7 @@
       min-height: 18px;
       margin-bottom: 8px;
       flex-shrink: 0;
+      transition: color 0.15s;
     }
 
     #process-description span { color: var(--color-primary); }
@@ -745,55 +841,6 @@
     .ghost-node { cursor: pointer; transition: opacity 0.15s; }
     .ghost-node:hover { opacity: 1 !important; }
 
-    /* ── COFFEE BUTTON ───────────────────────────── */
-    #coffee-btn {
-      display: block;
-      border: 1px solid var(--color-dim);
-      border-left: 3px solid var(--color-primary);
-      color: var(--color-primary);
-      font-family: 'Share Tech Mono', monospace;
-      font-size: 11px;
-      letter-spacing: 1px;
-      padding: 12px 14px;
-      text-decoration: none;
-      transition: all 0.15s;
-      line-height: 1.5;
-      box-shadow: 0 0 10px rgba(51,255,51,0.08), inset 0 0 10px rgba(51,255,51,0.03);
-    }
-
-    #coffee-btn:hover {
-      border-color: var(--color-primary);
-      border-left-width: 4px;
-      background: rgba(255,255,255,0.02);
-      box-shadow: 0 0 18px rgba(51,255,51,0.15), inset 0 0 12px rgba(51,255,51,0.05);
-    }
-
-    .coffee-label {
-      font-size: 10px;
-      color: var(--color-dim);
-      letter-spacing: 0px;
-      display: block;
-      margin-bottom: 3px;
-    }
-
-    .coffee-action {
-      color: var(--color-primary);
-      font-size: 12px;
-      letter-spacing: 0px;
-      display: block;
-    }
-
-    .coffee-sub {
-      font-size: 9px;
-      color: var(--color-dim);
-      letter-spacing: 0px;
-      display: block;
-      margin-top: 4px;
-      opacity: 0.7;
-    }
-
-    /* hide the default BMC floating button */
-    .bmc-btn-container, #bmc-wbtn { display: none !important; }
 
     /* ── RESPONSIVE ───────────────────────────────── */
     @media (max-width: 720px) {
@@ -808,8 +855,22 @@
 
   <!-- HEADER -->
   <div id="header">
-    <div id="title">TALES UNTOLD</div>
-    <div id="subtitle">AN AI-POWERED ADVENTURE &nbsp;·&nbsp; LEARN HOW AI THINKS</div>
+    <div id="header-left">
+      <a id="home-btn" href="https://andrewtechevillair.github.io/EvilLair/" rel="noopener">
+        <span class="home-label">// HOME</span>
+        ← EVIL LAIR
+      </a>
+    </div>
+    <div id="header-center">
+      <div id="title">TALES UNTOLD</div>
+      <div id="subtitle">AN AI-POWERED ADVENTURE &nbsp;·&nbsp; LEARN HOW AI THINKS</div>
+    </div>
+    <div id="header-right">
+      <a id="coffee-btn" href="https://www.buymeacoffee.com/AndrewTech" target="_blank" rel="noopener">
+        <span class="coffee-label">// SUPPORT</span>
+        BUY ME A COFFEE
+      </a>
+    </div>
   </div>
 
   <!-- TWO-COLUMN LAYOUT -->
@@ -820,7 +881,7 @@
 
       <div class="col-label">
         <span class="col-label-left">// STORY</span>
-        <div id="process-stages">
+        <div id="process-stages" onclick="if(currentTurn>0)openRobotModal()">
           <div class="process-stage" id="stage-receiving"><span class="stage-dot"></span>RECEIVING</div>
           <span class="process-arrow">→</span>
           <div class="process-stage" id="stage-reading"><span class="stage-dot"></span>READING</div>
@@ -835,7 +896,7 @@
         <span class="col-label-right" id="turn-display">TURN 1</span>
       </div>
 
-      <div id="process-description">Waiting for input...</div>
+      <div id="process-description" onclick="if(currentTurn>0)openRobotModal()">Waiting for input...</div>
 
       <div id="story-box" onclick="skipTypewriter()">
         <div id="story-text">Select a genre on the right, then press START ADVENTURE.
@@ -867,16 +928,6 @@ Each choice you make shapes the story — and the drawer below reveals exactly w
         <button id="start-over-btn" onclick="replayStory()">[ START OVER ]</button>
       </div>
 
-
-      <!-- COFFEE -->
-      <div class="sidebar-section">
-        <div class="sidebar-label">// SUPPORT</div>
-        <a id="coffee-btn" href="https://www.buymeacoffee.com/AndrewTech" target="_blank" rel="noopener">
-          <span class="coffee-label">ENJOYING THE ADVENTURE?</span>
-          <span class="coffee-action">[ BUY ME A COFFEE ]</span>
-          <span class="coffee-sub">keeps the AI running ↗</span>
-        </a>
-      </div>
 
       <!-- ROBOT BUTTON -->
       <div class="sidebar-section" id="robot-toggle-wrap">
@@ -1047,6 +1098,8 @@ Track the player's choices throughout. Their pattern — reckless or careful, bo
     stopRobotAnimation();
     showRobotHint();
     document.getElementById('robot-hint').classList.remove('blinking');
+    document.getElementById('process-stages').classList.add('clickable');
+    document.getElementById('process-description').classList.add('clickable');
     updateCostTicker();
     if (document.getElementById('robot-modal').classList.contains('open')) renderTab(activeTab);
   }
@@ -1107,6 +1160,8 @@ Track the player's choices throughout. Their pattern — reckless or careful, bo
       document.getElementById(`stage-${s}`).classList.remove('active','done');
     });
     document.getElementById('process-description').textContent = 'Waiting for input...';
+    document.getElementById('process-stages').classList.remove('clickable');
+    document.getElementById('process-description').classList.remove('clickable');
     unlockGenreButtons();
   }
 
