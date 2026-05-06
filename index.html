@@ -844,9 +844,68 @@
 
     /* ── RESPONSIVE ───────────────────────────────── */
     @media (max-width: 720px) {
-      #main-layout { grid-template-columns: 1fr; }
+      /* Let the page scroll naturally instead of locking to viewport */
+      html, body { height: auto; }
+      body {
+        height: auto;
+        overflow-y: auto;
+        padding: 12px 12px 32px;
+      }
+      #app { flex: none; min-height: 0; }
+
+      /* Header: buttons side-by-side on top, title below */
+      #header {
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-bottom: 14px;
+      }
+      #header-left  { flex: 1; order: 1; }
+      #header-right { flex: 1; order: 2; }
+      #header-center { flex: 0 0 100%; order: 3; padding-top: 4px; }
+
+      #home-btn, #coffee-btn { font-size: 10px; padding: 6px 10px; }
+
+      #title    { font-size: 34px; letter-spacing: 4px; }
+      #subtitle { font-size: 10px; letter-spacing: 1px; }
+
+      /* Single-column layout, sidebar above story */
+      #main-layout { grid-template-columns: 1fr; gap: 16px; }
       #sidebar { order: -1; }
-      #title { font-size: 38px; }
+
+      /* Story col: stop flex-growing, let content define height */
+      #story-col { flex: none; }
+      #story-box  { flex: none; overflow-y: visible; min-height: 180px; }
+
+      /* Col-label: wrap so stages go below the // STORY label */
+      .col-label { flex-wrap: wrap; row-gap: 6px; }
+      .col-label-left  { flex: 1; }
+      .col-label-right { flex: 0; }
+
+      /* Process stages: scroll horizontally instead of overflowing */
+      #process-stages {
+        flex: 0 0 100%;
+        order: 3;
+        overflow-x: auto;
+        justify-content: flex-start;
+        padding-bottom: 4px;
+      }
+
+      /* Shrink stage text slightly so more fits before scrolling */
+      .process-stage { font-size: 9px; }
+      .process-stage.active { font-size: 10px; }
+
+      /* Modal: taller on mobile, tabs scroll horizontally */
+      #robot-modal-inner { max-height: 92vh; width: 96vw; }
+      #drawer-tabs { overflow-x: auto; }
+      .drawer-tab {
+        flex: none;
+        font-size: 9px;
+        padding: 8px 8px;
+        white-space: nowrap;
+      }
+
+      /* Sidebar genre buttons: slightly smaller */
+      .genre-btn { font-size: 11px; letter-spacing: 1px; }
     }
   </style>
 </head>
