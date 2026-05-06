@@ -1,0 +1,35 @@
+{
+  "character": {
+    "id": "733ca7cf-78cd-4590-af49-80b1ac601991",
+    "name": "Vintage Robot",
+    "prompt": "vintage 1950s retro robot, boxy rectangular body, round porthole head with antennae, glowing dot eyes, visible rivets and bolts, dials and gauges on chest panel, warm copper and brass tones, aged metal plating, classic sci-fi aesthetic",
+    "size": {
+      "width": 68,
+      "height": 68
+    },
+    "template_id": "mannequin",
+    "directions": 4,
+    "view": "low top-down",
+    "created_at": "2026-04-14T03:23:30.110782+00:00"
+  },
+  "frames": {
+    "rotations": {
+      "south": "rotations/south.png",
+      "west": "rotations/west.png",
+      "east": "rotations/east.png",
+      "north": "rotations/north.png"
+    },
+    "animations": {
+      "animating-15d6dc65": {
+        "south": [
+          "animations/animating-15d6dc65/south/frame_000.png",
+          "animations/animating-15d6dc65/south/frame_001.png",
+          "animations/animating-15d6dc65/south/frame_002.png",
+          "animations/animating-15d6dc65/south/frame_003.png"
+        ]
+      }
+    }
+  },
+  "export_version": "2.0",
+  "export_date": "2026-04-14T03:27:34.991100"
+}
