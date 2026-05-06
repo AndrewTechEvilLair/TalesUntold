@@ -400,6 +400,10 @@
       transition: all 0.12s;
       text-align: left;
       width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
     }
 
     .genre-btn:hover { color: var(--color-primary); border-left-color: var(--color-primary); background: rgba(255,255,255,0.02); }
@@ -408,13 +412,12 @@
     .genre-btn.locked:hover { color: var(--color-dim); border-left-color: var(--color-dim); border-left-width: 2px; padding-left: 10px; background: none; }
 
     .genre-btn .recommended {
-      float: right;
       font-size: 9px;
       letter-spacing: 1px;
       color: var(--color-dim);
       border: 1px solid var(--color-dim);
       padding: 1px 4px;
-      margin-top: 1px;
+      flex-shrink: 0;
     }
 
     .genre-btn.active .recommended,
