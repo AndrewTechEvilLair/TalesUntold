@@ -82,7 +82,7 @@
     /* ── TWO-COLUMN LAYOUT ────────────────────────── */
     #main-layout {
       display: grid;
-      grid-template-columns: 1fr 190px;
+      grid-template-columns: 1fr 210px;
       gap: 24px;
       flex: 1;
       min-height: 0;
@@ -411,17 +411,6 @@
     .genre-btn.locked { opacity: 0.4; cursor: not-allowed; }
     .genre-btn.locked:hover { color: var(--color-dim); border-left-color: var(--color-dim); border-left-width: 2px; padding-left: 10px; background: none; }
 
-    .genre-btn .recommended {
-      font-size: 9px;
-      letter-spacing: 1px;
-      color: var(--color-dim);
-      border: 1px solid var(--color-dim);
-      padding: 1px 4px;
-      flex-shrink: 0;
-    }
-
-    .genre-btn.active .recommended,
-    .genre-btn:hover .recommended { color: var(--color-primary); border-color: var(--color-primary); }
 
     /* ── ROBOT BUTTON ─────────────────────────────── */
     #robot-btn {
@@ -782,7 +771,7 @@
     .coffee-label {
       font-size: 10px;
       color: var(--color-dim);
-      letter-spacing: 2px;
+      letter-spacing: 0px;
       display: block;
       margin-bottom: 3px;
     }
@@ -790,14 +779,14 @@
     .coffee-action {
       color: var(--color-primary);
       font-size: 12px;
-      letter-spacing: 1px;
+      letter-spacing: 0px;
       display: block;
     }
 
     .coffee-sub {
       font-size: 9px;
       color: var(--color-dim);
-      letter-spacing: 1px;
+      letter-spacing: 0px;
       display: block;
       margin-top: 4px;
       opacity: 0.7;
@@ -871,7 +860,7 @@ Each choice you make shapes the story — and the drawer below reveals exactly w
         <div id="genre-buttons">
           <button class="genre-btn active" data-genre="fantasy" onclick="setGenre('fantasy', event)">[ FANTASY ]</button>
           <button class="genre-btn" data-genre="scifi" onclick="setGenre('scifi', event)">[ SCI-FI ]</button>
-          <button class="genre-btn" data-genre="mystery" onclick="setGenre('mystery', event)">[ MYSTERY ]<span class="recommended">START HERE</span></button>
+          <button class="genre-btn" data-genre="mystery" onclick="setGenre('mystery', event)">[ MYSTERY ]</button>
           <button class="genre-btn" data-genre="horror" onclick="setGenre('horror', event)">[ HORROR ]</button>
         </div>
         <div id="genre-lock-msg">// genre locked during story</div>
@@ -881,7 +870,7 @@ Each choice you make shapes the story — and the drawer below reveals exactly w
 
       <!-- COFFEE -->
       <div class="sidebar-section">
-        <div class="sidebar-label">// SUPPORT THIS PROJECT</div>
+        <div class="sidebar-label">// SUPPORT</div>
         <a id="coffee-btn" href="https://www.buymeacoffee.com/AndrewTech" target="_blank" rel="noopener">
           <span class="coffee-label">ENJOYING THE ADVENTURE?</span>
           <span class="coffee-action">[ BUY ME A COFFEE ]</span>
